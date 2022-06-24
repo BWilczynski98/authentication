@@ -51,8 +51,8 @@ const AuthForm = () => {
         }
       })
       .then(data => {
-        console.log(data);
-        login(data.idToken);
+        const expirationTime = new Date(new Date().getTime() + (+data.expiresIn * 1000));
+        login(data.idToken, expirationTime.toISOString());
       })
       .catch(err => {
         alert(err.message)

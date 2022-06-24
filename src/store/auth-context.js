@@ -1,5 +1,5 @@
 import React, { createContext, useState } from 'react';
-
+let logoutTimer;
 export const AuthContext = createContext({
     token: 'sss',
     isLoggedIn: false,
@@ -7,17 +7,32 @@ export const AuthContext = createContext({
     logout: () => { },
 });
 
+const calculateRemainingTime = (expirationTime) => {
+    const currentTime = new Date().getTime();
+    const adjExpirationTime = new Date(expirationTime).getTime();
+    const remainingDuration = adjExpirationTime - currentTime;
+    return remainingDuration;
+};
+
 export const AuthStore = ({ children }) => {
-    const [token, setToken] = useState(null);
+    const initialToken = localStorage.getItem('token');
+    const [token, setToken] = useState(initialToken);
     const userIsLoggedIn = !!token;
 
-    const loginHandler = (token) => {
-        console.log(token);
-        setToken(token)
-    };
 
     const logoutHandler = () => {
-        setToken(null)
+        setToken(null);
+        localStorage.removeItem('token');
+    };
+
+    const loginHandler = (token, expirationTime) => {
+        console.log(token);
+        setToken(token);
+        localStorage.setItem('token', token);
+
+        const remainingTime = calculateRemainingTime(expirationTime);
+
+        setTimeout(logoutHandler, remainingTime)
     };
 
     const STORE = {
